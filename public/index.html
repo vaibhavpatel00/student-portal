@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="description" content="Vignan Student Attendance Portal - Track your attendance in real-time">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/images/logo.png">
+  <title>Login | Vignan Student Portal</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div class="bg-animation">
+    <div class="orb"></div>
+    <div class="orb"></div>
+    <div class="orb"></div>
+  </div>
+
+  <div class="auth-container">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <div class="logo-icon"><img src="/images/logo.png" alt="Vignan Logo"></div>
+        <h1>Vignan Portal</h1>
+        <p>Track your attendance in real-time</p>
+      </div>
+
+      <div id="alert" class="alert"></div>
+
+      <form id="loginForm" autocomplete="off">
+        <div class="form-group">
+          <label for="roll_number">Roll Number</label>
+          <input type="text" id="roll_number" name="roll_number" placeholder="e.g., 24891A0541" required
+            autocapitalize="characters">
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" placeholder="Enter your password" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary" id="loginBtn">
+          <span class="btn-text">Sign In</span>
+          <span class="spinner"></span>
+        </button>
+      </form>
+
+      <div class="auth-footer">
+        Don't have an account? <a href="/register">Register here</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/login.js"></script>
+</body>
+
+</html>
