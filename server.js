@@ -20,7 +20,7 @@ const PRODUCTION_URL = 'https://student-portal-r2tp.vercel.app';
 initDB().catch(err => console.error('DB init error:', err));
 
 // Middleware
-app.use(express.json({ limit: '2mb' }));
+app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -225,13 +225,20 @@ app.get('/api/announcements', requireAuth, async (req, res) => {
 
 app.post('/api/announcements', requireAuth, requireAdmin, async (req, res) => {
     try {
-        const { title, message } = req.body;
+        const { title, message, attachments } = req.body;
         if (!title || !message) {
             return res.status(400).json({ error: 'Title and message are required' });
         }
+        // attachments: [{name, type, data}] — data is base64
+        const safeAttachments = (attachments || []).slice(0, 5).map(a => ({
+            name: a.name || 'file',
+            type: a.type || 'application/octet-stream',
+            data: a.data,
+        }));
         const result = await createAnnouncement({
             title: title.trim(),
             message: message.trim(),
+            attachments: safeAttachments,
             posted_by: req.student.roll_number,
             posted_by_name: req.student.name,
         });

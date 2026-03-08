@@ -156,6 +156,13 @@
                 <span class="btn-text">Post Update</span>
                 <span class="spinner"></span>
             </button>
+            <div class="attach-bar">
+                <label class="attach-btn" for="attachInput">📎 Attach Files</label>
+                <input type="file" id="attachInput" multiple accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt"
+                    style="display:none;">
+                <span style="font-size:0.7rem;color:var(--text-muted);">Max 5 files, 5MB each</span>
+            </div>
+            <div class="attach-preview" id="attachPreview"></div>
         </div>
 
         <!-- Announcements Feed -->

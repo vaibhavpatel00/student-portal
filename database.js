@@ -149,11 +149,12 @@ async function getProfilePhoto(roll_number) {
 
 // ===== ANNOUNCEMENT OPERATIONS =====
 
-async function createAnnouncement({ title, message, posted_by, posted_by_name }) {
+async function createAnnouncement({ title, message, attachments, posted_by, posted_by_name }) {
   const database = await getDB();
   const result = await database.collection('announcements').insertOne({
     title,
     message,
+    attachments: attachments || [],
     posted_by,
     posted_by_name,
     created_at: new Date(),
