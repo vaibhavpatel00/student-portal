@@ -1,14 +1,34 @@
 document.addEventListener('DOMContentLoaded', () => {
+  const token = localStorage.getItem('authToken');
   let studentData = null;
+
+  if (!token) {
+    window.location.href = '/';
+    return;
+  }
+
+  // Helper: fetch with auth
+  async function authFetch(url, options = {}) {
+    const headers = { ...options.headers, 'Authorization': `Bearer ${token}` };
+    const res = await fetch(url, { ...options, headers });
+    if (res.status === 401) {
+      localStorage.removeItem('authToken');
+      window.location.href = '/';
+      return null;
+    }
+    return res;
+  }
 
   init();
 
   async function init() {
     try {
-      const res = await fetch('/api/me');
+      const res = await authFetch('/api/me');
+      if (!res) return;
       const data = await res.json();
 
       if (!data.student) {
+        localStorage.removeItem('authToken');
         window.location.href = '/';
         return;
       }
@@ -16,14 +36,15 @@ document.addEventListener('DOMContentLoaded', () => {
       setupUI();
       loadResults();
     } catch (err) {
+      localStorage.removeItem('authToken');
       window.location.href = '/';
     }
   }
 
   function setupUI() {
     document.getElementById('studentName').textContent = studentData.name || 'Student';
-    document.getElementById('logoutBtn').addEventListener('click', async () => {
-      await fetch('/api/logout');
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      localStorage.removeItem('authToken');
       window.location.href = '/';
     });
   }
@@ -33,7 +54,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const semList = document.getElementById('semesterList');
 
     try {
-      const res = await fetch('/api/results');
+      const res = await authFetch('/api/results');
+      if (!res) return;
       const data = await res.json();
 
       if (data.success && data.data) {
@@ -146,7 +168,6 @@ document.addEventListener('DOMContentLoaded', () => {
     return 'sgpa-low';
   }
 
-  // Toggle semester accordion
   window.toggleSemester = function (idx) {
     const card = document.querySelector(`.semester-card[data-idx="${idx}"]`);
     if (card) card.classList.toggle('expanded');

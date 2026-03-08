@@ -246,15 +246,19 @@ async function getTodayAttendance(rollNumber, department, year, section) {
     const today = new Date();
     const results = [];
 
-    // Period timings: starts at 10:00 AM, each 50 minutes, 7 periods
+    // Period timings based on actual college schedule
+    // Periods 1-5: 50 min each, break at 10:25-10:40, lunch at 1:10-2:00
+    // Periods 6-7: 45 min each after lunch
     const periodTimings = [
-        { hour: 1, start: '10:00 AM', end: '10:50 AM' },
-        { hour: 2, start: '10:50 AM', end: '11:40 AM' },
-        { hour: 3, start: '11:40 AM', end: '12:30 PM' },
-        { hour: 4, start: '12:30 PM', end: '1:20 PM' },
-        { hour: 5, start: '1:20 PM', end: '2:10 PM' },
-        { hour: 6, start: '2:10 PM', end: '3:00 PM' },
-        { hour: 7, start: '3:00 PM', end: '3:50 PM' },
+        { hour: 1, start: '8:45 AM', end: '9:35 AM' },
+        { hour: 2, start: '9:35 AM', end: '10:25 AM' },
+        // Short break: 10:25 AM - 10:40 AM
+        { hour: 3, start: '10:40 AM', end: '11:30 AM' },
+        { hour: 4, start: '11:30 AM', end: '12:20 PM' },
+        { hour: 5, start: '12:20 PM', end: '1:10 PM' },
+        // Lunch break: 1:10 PM - 2:00 PM
+        { hour: 6, start: '2:00 PM', end: '2:45 PM' },
+        { hour: 7, start: '2:45 PM', end: '3:30 PM' },
     ];
 
     // Fetch all hours (sequential to avoid overloading the portal)

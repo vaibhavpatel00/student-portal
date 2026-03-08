@@ -1,41 +1,45 @@
-const Database = require('better-sqlite3');
+const { MongoClient } = require('mongodb');
 const bcrypt = require('bcryptjs');
-const path = require('path');
 
-const DB_PATH = process.env.VERCEL
-  ? path.join('/tmp', 'students.db')
-  : path.join(__dirname, 'students.db');
-let db;
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/student-portal';
+let db = null;
+let client = null;
 
-function initDB() {
-  db = new Database(DB_PATH);
-  db.pragma('journal_mode = WAL');
+async function initDB() {
+  if (db) return db;
 
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS students (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      roll_number TEXT UNIQUE NOT NULL,
-      name TEXT NOT NULL,
-      department TEXT NOT NULL,
-      year TEXT NOT NULL,
-      section TEXT NOT NULL,
-      email TEXT UNIQUE NOT NULL,
-      password_hash TEXT NOT NULL,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
+  try {
+    client = new MongoClient(MONGODB_URI);
+    await client.connect();
+    db = client.db();
 
-  console.log('✅ Database initialized');
+    // Create indexes
+    await db.collection('students').createIndex({ roll_number: 1 }, { unique: true });
+    await db.collection('students').createIndex({ email: 1 }, { unique: true });
+
+    console.log('✅ MongoDB connected');
+    return db;
+  } catch (error) {
+    console.error('❌ MongoDB connection error:', error.message);
+    throw error;
+  }
+}
+
+async function getDB() {
+  if (!db) await initDB();
   return db;
 }
 
-function registerStudent({ roll_number, name, department, year, section, email, password }) {
-  const existing = db.prepare('SELECT id FROM students WHERE roll_number = ?').get(roll_number);
+async function registerStudent({ roll_number, name, department, year, section, email, password }) {
+  const database = await getDB();
+  const students = database.collection('students');
+
+  const existing = await students.findOne({ roll_number: roll_number.toUpperCase() });
   if (existing) {
     throw new Error('Roll number already registered');
   }
 
-  const existingEmail = db.prepare('SELECT id FROM students WHERE email = ?').get(email);
+  const existingEmail = await students.findOne({ email: email.toLowerCase() });
   if (existingEmail) {
     throw new Error('Email already registered');
   }
@@ -43,17 +47,26 @@ function registerStudent({ roll_number, name, department, year, section, email, 
   const salt = bcrypt.genSaltSync(10);
   const password_hash = bcrypt.hashSync(password, salt);
 
-  const stmt = db.prepare(`
-    INSERT INTO students (roll_number, name, department, year, section, email, password_hash)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
-  `);
+  const result = await students.insertOne({
+    roll_number: roll_number.toUpperCase(),
+    name,
+    department,
+    year,
+    section,
+    email: email.toLowerCase(),
+    password_hash,
+    created_at: new Date(),
+  });
 
-  const result = stmt.run(roll_number.toUpperCase(), name, department, year, section, email, password_hash);
-  return { id: result.lastInsertRowid, roll_number: roll_number.toUpperCase() };
+  return { id: result.insertedId, roll_number: roll_number.toUpperCase() };
 }
 
-function loginStudent(roll_number, password) {
-  const student = db.prepare('SELECT * FROM students WHERE roll_number = ?').get(roll_number.toUpperCase());
+async function loginStudent(roll_number, password) {
+  const database = await getDB();
+  const student = await database.collection('students').findOne({
+    roll_number: roll_number.toUpperCase()
+  });
+
   if (!student) {
     throw new Error('Roll number not found. Please register first.');
   }
@@ -63,15 +76,46 @@ function loginStudent(roll_number, password) {
     throw new Error('Invalid password');
   }
 
-  const { password_hash, ...safeStudent } = student;
+  const { password_hash, _id, ...safeStudent } = student;
+  safeStudent.id = _id.toString();
   return safeStudent;
 }
 
-function getStudent(roll_number) {
-  const student = db.prepare('SELECT * FROM students WHERE roll_number = ?').get(roll_number.toUpperCase());
+async function getStudent(roll_number) {
+  const database = await getDB();
+  const student = await database.collection('students').findOne({
+    roll_number: roll_number.toUpperCase()
+  });
+
   if (!student) return null;
-  const { password_hash, ...safeStudent } = student;
+  const { password_hash, _id, ...safeStudent } = student;
+  safeStudent.id = _id.toString();
   return safeStudent;
 }
 
-module.exports = { initDB, registerStudent, loginStudent, getStudent };
+async function findStudentByEmail(email) {
+  const database = await getDB();
+  const student = await database.collection('students').findOne({
+    email: email.toLowerCase()
+  });
+
+  if (!student) return null;
+  const { password_hash, _id, ...safeStudent } = student;
+  safeStudent.id = _id.toString();
+  return safeStudent;
+}
+
+async function updatePassword(email, newPassword) {
+  const database = await getDB();
+  const salt = bcrypt.genSaltSync(10);
+  const password_hash = bcrypt.hashSync(newPassword, salt);
+
+  const result = await database.collection('students').updateOne(
+    { email: email.toLowerCase() },
+    { $set: { password_hash } }
+  );
+
+  return result.modifiedCount > 0;
+}
+
+module.exports = { initDB, getDB, registerStudent, loginStudent, getStudent, findStudentByEmail, updatePassword };

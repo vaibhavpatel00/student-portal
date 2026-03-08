@@ -3,6 +3,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const alert = document.getElementById('alert');
     const loginBtn = document.getElementById('loginBtn');
 
+    // Check if already logged in
+    const token = localStorage.getItem('authToken');
+    if (token) {
+        window.location.href = '/dashboard';
+        return;
+    }
+
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
@@ -29,6 +36,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await res.json();
 
             if (data.success) {
+                // Store JWT token
+                localStorage.setItem('authToken', data.token);
                 showAlert('Login successful! Redirecting...', 'success');
                 setTimeout(() => {
                     window.location.href = '/dashboard';

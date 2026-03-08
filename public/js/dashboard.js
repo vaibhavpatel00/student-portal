@@ -1,16 +1,36 @@
 document.addEventListener('DOMContentLoaded', () => {
+  const token = localStorage.getItem('authToken');
   let studentData = null;
+  let countdownInterval = null;
+
+  if (!token) {
+    window.location.href = '/';
+    return;
+  }
+
+  // Helper: fetch with auth
+  async function authFetch(url, options = {}) {
+    const headers = { ...options.headers, 'Authorization': `Bearer ${token}` };
+    const res = await fetch(url, { ...options, headers });
+    if (res.status === 401) {
+      localStorage.removeItem('authToken');
+      window.location.href = '/';
+      return null;
+    }
+    return res;
+  }
 
   // Initialize
   init();
 
   async function init() {
-    // Check auth
     try {
-      const res = await fetch('/api/me');
+      const res = await authFetch('/api/me');
+      if (!res) return;
       const data = await res.json();
 
       if (!data.student) {
+        localStorage.removeItem('authToken');
         window.location.href = '/';
         return;
       }
@@ -20,12 +40,88 @@ document.addEventListener('DOMContentLoaded', () => {
       loadTodayAttendance();
       loadOverviewAttendance();
     } catch (err) {
+      localStorage.removeItem('authToken');
       window.location.href = '/';
     }
   }
 
+  // Period schedule with display times (+7 min after period starts)
+  const PERIOD_SCHEDULE = [
+    { hour: 1, start: '8:45 AM', end: '9:35 AM', displayFrom: '09:02', label: '8:45 AM - 9:35 AM' },
+    { hour: 2, start: '9:35 AM', end: '10:25 AM', displayFrom: '09:42', label: '9:35 AM - 10:25 AM' },
+    // Short break 10:25 - 10:40
+    { hour: 3, start: '10:40 AM', end: '11:30 AM', displayFrom: '10:47', label: '10:40 AM - 11:30 AM' },
+    { hour: 4, start: '11:30 AM', end: '12:20 PM', displayFrom: '11:37', label: '11:30 AM - 12:20 PM' },
+    { hour: 5, start: '12:20 PM', end: '1:10 PM', displayFrom: '12:27', label: '12:20 PM - 1:10 PM' },
+    // Lunch break 1:10 - 2:00
+    { hour: 6, start: '2:00 PM', end: '2:45 PM', displayFrom: '14:07', label: '2:00 PM - 2:45 PM' },
+    { hour: 7, start: '2:45 PM', end: '3:30 PM', displayFrom: '14:57', label: '2:45 PM - 3:30 PM' },
+  ];
+
+  function getCurrentIST() {
+    // Get current time in IST
+    const now = new Date();
+    const istOffset = 5.5 * 60; // IST is UTC+5:30
+    const utc = now.getTime() + now.getTimezoneOffset() * 60000;
+    return new Date(utc + istOffset * 60000);
+  }
+
+  function getTimeInMinutes(timeStr) {
+    // timeStr format: "HH:MM" in 24hr
+    const [h, m] = timeStr.split(':').map(Number);
+    return h * 60 + m;
+  }
+
+  function getNextPeriodCountdown() {
+    const now = getCurrentIST();
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+    for (const period of PERIOD_SCHEDULE) {
+      const displayMinutes = getTimeInMinutes(period.displayFrom);
+      if (currentMinutes < displayMinutes) {
+        const diffMs = (displayMinutes - currentMinutes) * 60000 - now.getSeconds() * 1000;
+        const mins = Math.floor(diffMs / 60000);
+        const secs = Math.floor((diffMs % 60000) / 1000);
+        return {
+          period: period.hour,
+          mins,
+          secs,
+          label: `Period ${period.hour} attendance in ${mins}m ${secs}s`
+        };
+      }
+    }
+    return null; // All periods done for today
+  }
+
+  function startCountdownTimer() {
+    if (countdownInterval) clearInterval(countdownInterval);
+
+    const countdownEl = document.getElementById('countdownTimer');
+    if (!countdownEl) return;
+
+    function updateCountdown() {
+      const next = getNextPeriodCountdown();
+      if (next) {
+        countdownEl.innerHTML = `<span class="countdown-icon">⏱️</span> Period ${next.period} attendance in <strong>${next.mins}m ${next.secs}s</strong>`;
+        countdownEl.style.display = 'flex';
+      } else {
+        const now = getCurrentIST();
+        const currentMinutes = now.getHours() * 60 + now.getMinutes();
+        if (currentMinutes < getTimeInMinutes('09:02')) {
+          countdownEl.innerHTML = `<span class="countdown-icon">⏱️</span> Period 1 attendance in <strong>${getTimeInMinutes('09:02') - currentMinutes}m</strong>`;
+          countdownEl.style.display = 'flex';
+        } else {
+          countdownEl.innerHTML = `<span class="countdown-icon">✅</span> All periods completed for today`;
+          countdownEl.style.display = 'flex';
+        }
+      }
+    }
+
+    updateCountdown();
+    countdownInterval = setInterval(updateCountdown, 1000);
+  }
+
   function setupUI() {
-    // Greeting based on time
     const hour = new Date().getHours();
     let greetText = 'Good Evening';
     if (hour < 12) greetText = 'Good Morning';
@@ -34,16 +130,13 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('greeting').textContent = greetText;
     document.getElementById('studentName').textContent = studentData.name || 'Student';
 
-    // Avatar
     const initials = (studentData.name || 'S').charAt(0).toUpperCase();
     document.getElementById('avatar').textContent = initials;
 
-    // Student info
     document.getElementById('rollDisplay').textContent = studentData.roll_number;
     document.getElementById('deptDisplay').textContent =
       `${studentData.department} • Year ${studentData.year} • Section ${studentData.section}`;
 
-    // Today's date
     const today = new Date();
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -52,17 +145,18 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('todayDate').textContent =
       `${today.getDate()} ${months[today.getMonth()]} ${today.getFullYear()}`;
 
-    // Set default date range (semester start to today)
     const fromDefault = '2025-12-22';
     const toDefault = today.toISOString().split('T')[0];
     document.getElementById('fromDate').value = fromDefault;
     document.getElementById('toDate').value = toDefault;
 
-    // Event listeners
     document.getElementById('logoutBtn').addEventListener('click', logout);
     document.getElementById('refreshToday').addEventListener('click', loadTodayAttendance);
     document.getElementById('refreshOverview').addEventListener('click', loadOverviewAttendance);
     document.getElementById('fetchRange').addEventListener('click', loadOverviewAttendance);
+
+    // Start countdown timer
+    startCountdownTimer();
   }
 
   // ===== TODAY'S ATTENDANCE =====
@@ -79,7 +173,8 @@ document.addEventListener('DOMContentLoaded', () => {
     refreshBtn.classList.add('spinning');
 
     try {
-      const res = await fetch('/api/attendance/today');
+      const res = await authFetch('/api/attendance/today');
+      if (!res) return;
       const data = await res.json();
 
       refreshBtn.classList.remove('spinning');
@@ -109,15 +204,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function renderPeriods(periods) {
     const grid = document.getElementById('periodsGrid');
+    const now = getCurrentIST();
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
     let presentCount = 0;
     let html = '';
 
     periods.forEach((period, index) => {
+      const schedule = PERIOD_SCHEDULE[index];
+      const displayMinutes = schedule ? getTimeInMinutes(schedule.displayFrom) : 0;
+      const isDisplayed = currentMinutes >= displayMinutes;
+
       let statusClass = 'pending';
       let statusText = 'Upcoming';
       let statusEmoji = '⏳';
 
-      if (period.noClass) {
+      if (!isDisplayed) {
+        // Period not yet displayable
+        statusClass = 'pending';
+        statusText = 'Upcoming';
+        statusEmoji = '⏳';
+      } else if (period.noClass) {
         statusClass = 'pending';
         statusText = 'No Class';
         statusEmoji = '📭';
@@ -131,18 +237,19 @@ document.addEventListener('DOMContentLoaded', () => {
         statusText = 'Absent';
         statusEmoji = '❌';
       } else {
-        // null = no data yet
         statusClass = 'pending';
         statusText = 'No Data';
         statusEmoji = '⏳';
       }
 
+      const timing = schedule ? schedule.label : period.timing;
+
       html += `
         <div class="period-card ${statusClass}">
           <div class="period-number">${period.hour}</div>
           <div class="period-info">
-            <div class="period-subject">${period.subject || 'Period ' + period.hour}</div>
-            <div class="period-time">${period.timing}</div>
+            <div class="period-subject">${isDisplayed ? (period.subject || 'Period ' + period.hour) : 'Period ' + period.hour}</div>
+            <div class="period-time">${timing}</div>
           </div>
           <div class="period-status">${statusEmoji} ${statusText}</div>
         </div>
@@ -174,7 +281,8 @@ document.addEventListener('DOMContentLoaded', () => {
         ? `/api/attendance/range?from=${fromDate}&to=${toDate}`
         : '/api/attendance/overview';
 
-      const res = await fetch(url);
+      const res = await authFetch(url);
+      if (!res) return;
       const data = await res.json();
 
       refreshBtn.classList.remove('spinning');
@@ -206,7 +314,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const content = document.getElementById('overviewContent');
     const percentage = data.overallPercentage || 0;
 
-    // Calculate total hours
     let totalConducted = 0;
     let totalAttended = 0;
     if (data.subjects && data.subjects.length > 0) {
@@ -216,14 +323,12 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
-    // Progress ring circumference = 2 * PI * radius (60)
     const circumference = 2 * Math.PI * 60;
     const offset = circumference - (percentage / 100) * circumference;
 
-    // Determine color based on percentage
-    let percentColor = '#00d4aa'; // green
-    if (percentage < 65) percentColor = '#ff6b6b'; // red
-    else if (percentage < 75) percentColor = '#ffa726'; // orange
+    let percentColor = '#00d4aa';
+    if (percentage < 65) percentColor = '#ff6b6b';
+    else if (percentage < 75) percentColor = '#ffa726';
 
     let html = `
       <div class="progress-ring-container">
@@ -253,7 +358,6 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     `;
 
-    // Subject-wise breakdown
     if (data.subjects && data.subjects.length > 0) {
       html += `<div class="subjects-list">`;
       data.subjects.forEach(subject => {
@@ -278,14 +382,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     content.innerHTML = html;
 
-    // Animate progress ring
     setTimeout(() => {
       const ring = content.querySelector('.progress-ring-fill');
       if (ring) {
         ring.style.strokeDashoffset = ring.dataset.target;
       }
-
-      // Animate subject bars
       content.querySelectorAll('.subject-bar-fill').forEach(bar => {
         setTimeout(() => {
           bar.style.width = bar.dataset.width;
@@ -296,9 +397,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ===== LOGOUT =====
   async function logout() {
-    try {
-      await fetch('/api/logout');
-    } catch (e) { }
+    localStorage.removeItem('authToken');
     window.location.href = '/';
   }
 });
