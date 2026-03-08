@@ -139,7 +139,6 @@ document.addEventListener('DOMContentLoaded', () => {
               <div class="announcement-body">${escapeHtml(item.message)}</div>
               ${attachHtml}
               <div class="announcement-meta">
-                <span>By ${escapeHtml(item.posted_by_name || 'Admin')}</span>
                 <span>${timeAgo}</span>
               </div>
             </div>
