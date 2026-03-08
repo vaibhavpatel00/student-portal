@@ -2,7 +2,9 @@ const Database = require('better-sqlite3');
 const bcrypt = require('bcryptjs');
 const path = require('path');
 
-const DB_PATH = path.join(__dirname, 'students.db');
+const DB_PATH = process.env.VERCEL
+  ? path.join('/tmp', 'students.db')
+  : path.join(__dirname, 'students.db');
 let db;
 
 function initDB() {

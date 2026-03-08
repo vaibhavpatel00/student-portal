@@ -175,9 +175,12 @@ function getDefaultFromDate() {
 }
 
 // Start server
-app.listen(PORT, () => {
-    console.log(`\n🎓 Student Portal running at http://localhost:${PORT}`);
-    console.log(`   Login: http://localhost:${PORT}/`);
-    console.log(`   Register: http://localhost:${PORT}/register`);
-    console.log(`   Dashboard: http://localhost:${PORT}/dashboard\n`);
-});
+if (process.env.NODE_ENV !== 'production') {
+    app.listen(PORT, () => {
+        console.log(`\n🎓 Student Portal running at http://localhost:${PORT}`);
+        console.log(`   Login: http://localhost:${PORT}/`);
+        console.log(`   Register: http://localhost:${PORT}/register`);
+        console.log(`   Dashboard: http://localhost:${PORT}/dashboard\n`);
+    });
+}
+module.exports = app;
