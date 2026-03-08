@@ -1,20 +1,25 @@
-const CACHE_NAME = 'vignan-portal-v1';
+const CACHE_NAME = 'vignan-portal-v2';
 const ASSETS_TO_CACHE = [
     '/',
     '/index.html',
     '/register.html',
     '/dashboard.html',
     '/results.html',
+    '/forgot-password.html',
+    '/reset-password.html',
     '/css/style.css',
     '/js/login.js',
     '/js/register.js',
     '/js/dashboard.js',
     '/js/results.js',
+    '/js/forgot-password.js',
+    '/js/reset-password.js',
     '/images/logo.png'
 ];
 
-// Install Event
+// Install Event — skip waiting to activate immediately
 self.addEventListener('install', (event) => {
+    self.skipWaiting();
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then((cache) => {
@@ -24,28 +29,27 @@ self.addEventListener('install', (event) => {
     );
 });
 
-// Activate Event
+// Activate Event — claim all clients and delete old caches
 self.addEventListener('activate', (event) => {
-    const cacheAllowlist = [CACHE_NAME];
     event.waitUntil(
         caches.keys().then((cacheNames) => {
             return Promise.all(
                 cacheNames.map((cacheName) => {
-                    if (cacheAllowlist.indexOf(cacheName) === -1) {
+                    if (cacheName !== CACHE_NAME) {
+                        console.log('Deleting old cache:', cacheName);
                         return caches.delete(cacheName);
                     }
                 })
             );
-        })
+        }).then(() => self.clients.claim())
     );
 });
 
-// Fetch Event
+// Fetch Event — network-first for everything
 self.addEventListener('fetch', (event) => {
-    // Only intercept GET requests
     if (event.request.method !== 'GET') return;
-    
-    // Skip API calls from caching aggressively, always fetch from network first
+
+    // Skip API calls from caching
     if (event.request.url.includes('/api/')) {
         event.respondWith(
             fetch(event.request).catch(() => {
@@ -55,15 +59,20 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
+    // Network-first strategy for all assets
     event.respondWith(
-        caches.match(event.request)
+        fetch(event.request)
             .then((response) => {
-                // Cache hit - return response
-                if (response) {
-                    return response;
-                }
-                return fetch(event.request);
-            }
-        )
+                // Update cache with fresh response
+                const responseClone = response.clone();
+                caches.open(CACHE_NAME).then((cache) => {
+                    cache.put(event.request, responseClone);
+                });
+                return response;
+            })
+            .catch(() => {
+                // Fallback to cache if offline
+                return caches.match(event.request);
+            })
     );
 });
