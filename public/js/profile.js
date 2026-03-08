@@ -6,9 +6,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function authFetch(url, options = {}) {
         const headers = { ...options.headers, 'Authorization': `Bearer ${token}` };
-        const res = await fetch(url, { ...options, headers });
-        if (res.status === 401) { localStorage.removeItem('authToken'); window.location.href = '/'; return null; }
-        return res;
+        try {
+            const res = await fetch(url, { ...options, headers });
+            if (res.status === 401) {
+                localStorage.removeItem('authToken');
+                window.location.href = '/';
+                return null;
+            }
+            return res;
+        } catch (err) {
+            console.error('authFetch error:', err);
+            return null;
+        }
     }
 
     init();
@@ -17,12 +26,40 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const res = await authFetch('/api/me');
             if (!res) return;
-            const data = await res.json();
-            if (!data.student) { localStorage.removeItem('authToken'); window.location.href = '/'; return; }
+
+            let data;
+            try {
+                data = await res.json();
+            } catch (parseErr) {
+                console.error('Failed to parse /api/me response:', parseErr);
+                showPageError('Failed to load profile data. Please try again.');
+                return;
+            }
+
+            if (!data.student) {
+                console.error('/api/me returned no student:', data);
+                showPageError('Session expired. Please login again.');
+                setTimeout(() => {
+                    localStorage.removeItem('authToken');
+                    window.location.href = '/';
+                }, 2000);
+                return;
+            }
+
             studentData = data.student;
             setupUI();
             loadPhoto();
-        } catch (err) { localStorage.removeItem('authToken'); window.location.href = '/'; }
+        } catch (err) {
+            console.error('Profile init error:', err);
+            showPageError('Something went wrong. Please try again.');
+        }
+    }
+
+    function showPageError(msg) {
+        const card = document.getElementById('profileCard');
+        if (card) {
+            card.innerHTML = `<div style="text-align:center;padding:30px;"><p style="color:var(--text-secondary);">${msg}</p><a href="/" class="btn btn-primary" style="display:inline-block;margin-top:12px;">Go to Login</a></div>`;
+        }
     }
 
     function setupUI() {
@@ -46,16 +83,12 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('adminBadge').style.display = 'inline-block';
         }
 
-        // Logout
         document.getElementById('logoutBtn').addEventListener('click', () => {
             localStorage.removeItem('authToken');
             window.location.href = '/';
         });
 
-        // Save name
         document.getElementById('saveNameBtn').addEventListener('click', saveName);
-
-        // Photo upload
         document.getElementById('photoInput').addEventListener('change', handlePhotoUpload);
     }
 
@@ -71,7 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const initials = (studentData.name || 'S').charAt(0).toUpperCase();
                 document.getElementById('photoContainer').textContent = initials;
             }
-        } catch (err) { /* ignore */ }
+        } catch (err) { /* ignore photo load errors */ }
     }
 
     async function saveName() {
@@ -115,8 +148,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const reader = new FileReader();
         reader.onload = async function (event) {
             const base64 = event.target.result;
-
-            // Show preview immediately
             const container = document.getElementById('photoContainer');
             container.innerHTML = `<img src="${base64}" class="profile-photo" alt="Profile">`;
 

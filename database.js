@@ -91,7 +91,7 @@ async function getStudent(roll_number) {
     roll_number: roll_number.toUpperCase()
   });
   if (!student) return null;
-  const { password_hash, _id, ...safeStudent } = student;
+  const { password_hash, _id, profile_photo, ...safeStudent } = student;
   safeStudent.id = _id.toString();
   return safeStudent;
 }
