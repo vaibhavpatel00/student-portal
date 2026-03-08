@@ -1,0 +1,26 @@
+{
+    "host": "student-portal-r2tp.vercel.app",
+    "name": "Vignan Portal",
+    "shortName": "Vignan Portal",
+    "themeColor": "#1e3a8a",
+    "navigationColor": "#ffffff",
+    "navigationColorDark": "#000000",
+    "navigationDividerColor": "#000000",
+    "navigationDividerColorDark": "#000000",
+    "backgroundColor": "#ffffff",
+    "startUrl": "/dashboard",
+    "iconUrl": "https://student-portal-r2tp.vercel.app/images/logo.png",
+    "maskableIconUrl": "https://student-portal-r2tp.vercel.app/images/logo.png",
+    "monochromeIconUrl": "https://student-portal-r2tp.vercel.app/images/logo.png",
+    "packageId": "com.vignanportal.app",
+    "display": "standalone",
+    "orientation": "portrait",
+    "webManifestUrl": "https://student-portal-r2tp.vercel.app/manifest.json",
+    "fallbackType": "customtabs",
+    "features": {},
+    "alphaDependencies": {
+        "enabled": false
+    },
+    "enableNotifications": true,
+    "generatorApp": "bubblewrap-cli"
+}

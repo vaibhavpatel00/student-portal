@@ -1,0 +1,9 @@
+{
+  "appId": "com.vignanportal.app",
+  "appName": "Vignan Portal",
+  "webDir": "public",
+  "server": {
+    "url": "https://student-portal-r2tp.vercel.app/",
+    "cleartext": true
+  }
+}

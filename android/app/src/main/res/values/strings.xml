@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Vignan Portal</string>
+    <string name="title_activity_main">Vignan Portal</string>
+    <string name="package_name">com.vignanportal.app</string>
+    <string name="custom_url_scheme">com.vignanportal.app</string>
+</resources>
