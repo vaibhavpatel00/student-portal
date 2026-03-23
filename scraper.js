@@ -1,7 +1,7 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
 
-const BASE_URL = 'https://vignanits.ac.in/Attendance';
+const BASE_URL = 'http://103.52.36.11/Attendance';
 const PORTAL_USER = '206';
 const PORTAL_PASS = 'Vgnt';
 

@@ -49,6 +49,7 @@
       <div class="auth-footer" style="margin-top:12px;">
         <a href="/forgot-password" style="font-size:0.85rem;">Forgot Password?</a>
       </div>
+
       <div class="auth-footer">
         Don't have an account? <a href="/register">Register here</a>
       </div>
@@ -56,6 +57,29 @@
   </div>
 
   <script src="/js/login.js"></script>
+
+  <!-- AdMob Banner -->
+  <script>
+    window.addEventListener('DOMContentLoaded', async () => {
+      // Check if running natively and AdMob is available via Capacitor
+      if (window.Capacitor && window.Capacitor.isNative) {
+        const { AdMob } = window.Capacitor.Plugins;
+        if (AdMob) {
+          try {
+            await AdMob.initialize();
+            await AdMob.showBanner({
+              adId: 'ca-app-pub-8014232754853322/3736068867',
+              adSize: 'BANNER',
+              position: 'BOTTOM_CENTER'
+            });
+          } catch (err) {
+            console.log("AdMob error:", err);
+          }
+        }
+      }
+    });
+  </script>
+
 </body>
 
 </html>

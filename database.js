@@ -1,7 +1,7 @@
 const { MongoClient, ObjectId } = require('mongodb');
 const bcrypt = require('bcryptjs');
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/student-portal';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://vaibhav:VignanPortal2026@cluster0.3dtfo7d.mongodb.net/student-portal?appName=Cluster0';
 const ADMIN_ROLL = '24891A0541';
 let db = null;
 let client = null;
@@ -12,13 +12,13 @@ async function initDB() {
   try {
     client = new MongoClient(MONGODB_URI);
     await client.connect();
-    db = client.db();
+    db = client.db('student-portal');
 
     await db.collection('students').createIndex({ roll_number: 1 }, { unique: true });
     await db.collection('students').createIndex({ email: 1 }, { unique: true });
     await db.collection('announcements').createIndex({ created_at: -1 });
 
-    console.log('✅ MongoDB connected');
+    console.log('✅ MongoDB Atlas connected');
     return db;
   } catch (error) {
     console.error('❌ MongoDB connection error:', error.message);
