@@ -1,7 +1,7 @@
 const { MongoClient, ObjectId } = require('mongodb');
 const bcrypt = require('bcryptjs');
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://vaibhav:VignanPortal2026@cluster0.3dtfo7d.mongodb.net/student-portal?appName=Cluster0';
+const MONGODB_URI = 'mongodb+srv://vaibhav:VignanPortal2026@cluster0.3dtfo7d.mongodb.net/student-portal?appName=Cluster0';
 const ADMIN_ROLL = '24891A0541';
 let db = null;
 let client = null;
