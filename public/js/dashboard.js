@@ -154,6 +154,11 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('refreshToday').addEventListener('click', loadTodayAttendance);
     document.getElementById('refreshOverview').addEventListener('click', loadOverviewAttendance);
     document.getElementById('fetchRange').addEventListener('click', loadOverviewAttendance);
+    
+    const showAdBtn = document.getElementById('showAdBtn');
+    if (showAdBtn) {
+      showAdBtn.addEventListener('click', showTestAd);
+    }
 
     // Start countdown timer
     startCountdownTimer();
@@ -399,6 +404,32 @@ document.addEventListener('DOMContentLoaded', () => {
   async function logout() {
     localStorage.removeItem('authToken');
     window.location.href = '/';
+  }
+
+  // ===== UNITY ADS =====
+  async function showTestAd() {
+    const btn = document.getElementById('showAdBtn');
+    const originalText = btn.textContent;
+    
+    try {
+      btn.textContent = 'Loading Ad...';
+      btn.disabled = true;
+      
+      console.log('UNITY ADS: Loading Interstitial...');
+      const { UnityAds } = Capacitor.Plugins;
+      await UnityAds.loadAd({ placementId: 'Interstitial_Android' });
+      
+      console.log('UNITY ADS: Showing Interstitial...');
+      const result = await UnityAds.showAd({ placementId: 'Interstitial_Android' });
+      
+      console.log('UNITY ADS: Ad Result State -', result.state);
+    } catch (err) {
+      console.error('UNITY ADS Error:', err.message);
+      alert('Failed to show ad: ' + err.message);
+    } finally {
+      btn.textContent = originalText;
+      btn.disabled = false;
+    }
   }
 });
 

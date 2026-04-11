@@ -1,1 +1,3 @@
-google.com, pub-8014232754853322, DIRECT, f08c47fec0942fa0
+# Unity Ads app-ads.txt
+# Replace the line below with the string provided in your Unity Dashboard (Monetize -> Ad Units -> app-ads.txt)
+# Example format: unityads.com, 1234567, DIRECT, 5f1b5e5498878864

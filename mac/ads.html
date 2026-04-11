@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Ad — Vignan Portal</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #0a0a0a;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Animated background */
+    .bg-glow {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .bg-glow .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(100px);
+      opacity: 0.3;
+      animation: float 12s ease-in-out infinite;
+    }
+    .bg-glow .orb:nth-child(1) {
+      width: 350px; height: 350px;
+      background: #6366f1;
+      top: -120px; right: -80px;
+    }
+    .bg-glow .orb:nth-child(2) {
+      width: 250px; height: 250px;
+      background: #059669;
+      bottom: -80px; left: -60px;
+      animation-delay: -4s;
+    }
+    .bg-glow .orb:nth-child(3) {
+      width: 200px; height: 200px;
+      background: #8b5cf6;
+      top: 40%; left: 30%;
+      animation-delay: -8s;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      25% { transform: translate(40px, -40px) scale(1.1); }
+      50% { transform: translate(-30px, 30px) scale(0.95); }
+      75% { transform: translate(20px, 20px) scale(1.05); }
+    }
+
+    .ad-container {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      max-width: 600px;
+      padding: 40px;
+    }
+
+    .ad-icon {
+      font-size: 4rem;
+      margin-bottom: 20px;
+      animation: bounce 2s ease infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .ad-title {
+      font-size: 1.8rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6, #a78bfa);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .ad-subtitle {
+      font-size: 1rem;
+      color: rgba(255, 255, 255, 0.6);
+      margin-bottom: 32px;
+      line-height: 1.5;
+    }
+
+    /* Sponsored content cards */
+    .sponsored-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .sponsored-card {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 20px;
+      text-align: left;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .sponsored-card:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(99, 102, 241, 0.15);
+    }
+
+    .sponsored-card .card-icon {
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+
+    .sponsored-card .card-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .sponsored-card .card-desc {
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.5);
+      line-height: 1.4;
+    }
+
+    .sponsored-label {
+      display: inline-block;
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: rgba(255, 255, 255, 0.35);
+      margin-bottom: 16px;
+    }
+
+    /* Countdown timer */
+    .countdown {
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.5);
+      margin-bottom: 16px;
+    }
+    .countdown .timer {
+      font-weight: 700;
+      color: #a78bfa;
+      font-size: 1.1rem;
+    }
+
+    /* Close button */
+    .close-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 32px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .close-btn.visible {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .close-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(99, 102, 241, 0.4);
+    }
+
+    /* Progress bar */
+    .progress-bar {
+      width: 200px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+      margin: 0 auto 16px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #6366f1, #8b5cf6);
+      border-radius: 2px;
+      width: 0%;
+      transition: width 0.5s linear;
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-glow">
+    <div class="orb"></div>
+    <div class="orb"></div>
+    <div class="orb"></div>
+  </div>
+
+  <div class="ad-container">
+    <div class="ad-icon">📢</div>
+    <div class="ad-title">Sponsored Content</div>
+    <div class="ad-subtitle">Support Vignan Portal by viewing this brief message</div>
+
+    <div class="sponsored-label">✦ Sponsored ✦</div>
+
+    <div class="sponsored-cards">
+      <div class="sponsored-card" onclick="handleCardClick('learn')">
+        <div class="card-icon">📚</div>
+        <div class="card-title">Study Resources</div>
+        <div class="card-desc">Access premium study materials and exam prep guides</div>
+      </div>
+      <div class="sponsored-card" onclick="handleCardClick('career')">
+        <div class="card-icon">💼</div>
+        <div class="card-title">Campus Hiring</div>
+        <div class="card-desc">Exclusive internship and job opportunities for students</div>
+      </div>
+      <div class="sponsored-card" onclick="handleCardClick('tech')">
+        <div class="card-icon">💻</div>
+        <div class="card-title">Skill Courses</div>
+        <div class="card-desc">Free coding and tech courses from industry leaders</div>
+      </div>
+      <div class="sponsored-card" onclick="handleCardClick('community')">
+        <div class="card-icon">🎓</div>
+        <div class="card-title">Student Network</div>
+        <div class="card-desc">Join thousands of engineering students across India</div>
+      </div>
+    </div>
+
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+
+    <div class="countdown" id="countdown">
+      Closing in <span class="timer" id="timerText">10</span> seconds
+    </div>
+
+    <button class="close-btn" id="closeBtn" onclick="closeAd()">
+      ✕ Close Ad
+    </button>
+  </div>
+
+  <script>
+    const AD_DURATION = 10; // seconds
+    let timeLeft = AD_DURATION;
+    let timerInterval = null;
+
+    function startTimer() {
+      const progressFill = document.getElementById('progressFill');
+      const timerText = document.getElementById('timerText');
+      const closeBtn = document.getElementById('closeBtn');
+      const countdown = document.getElementById('countdown');
+
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        timerText.textContent = timeLeft;
+
+        // Update progress bar
+        const progress = ((AD_DURATION - timeLeft) / AD_DURATION) * 100;
+        progressFill.style.width = progress + '%';
+
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          countdown.style.display = 'none';
+          closeBtn.classList.add('visible');
+        }
+      }, 1000);
+    }
+
+    function closeAd() {
+      window.close();
+    }
+
+    function handleCardClick(type) {
+      console.log('Sponsored card clicked:', type);
+      // In production, this would open the actual sponsor URL
+    }
+
+    // Start the countdown when the page loads
+    window.addEventListener('DOMContentLoaded', () => {
+      startTimer();
+    });
+
+    // Also allow closing with Escape key after timer completes
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && timeLeft <= 0) {
+        closeAd();
+      }
+    });
+  </script>
+</body>
+</html>

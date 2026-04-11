@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account & Data Deletion - Student Portal</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg-color: #f9fafb;
+            --card-bg: #ffffff;
+            --text-main: #111827;
+            --text-muted: #6b7280;
+            --border-color: #e5e7eb;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            max-width: 600px;
+            width: 90%;
+            margin: 40px auto;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text-main);
+            text-align: center;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            margin-bottom: 32px;
+            font-size: 15px;
+        }
+
+        p {
+            margin-bottom: 16px;
+        }
+
+        .info-box {
+            background-color: #ebf5ff;
+            border-left: 4px solid var(--primary);
+            padding: 16px;
+            margin-bottom: 24px;
+            border-radius: 0 8px 8px 0;
+            font-size: 14px;
+        }
+
+        ul {
+            padding-left: 20px;
+            margin-bottom: 24px;
+            color: var(--text-muted);
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .action-button {
+            display: block;
+            width: 100%;
+            background-color: var(--primary);
+            color: white;
+            text-align: center;
+            padding: 14px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 16px;
+            transition: background-color 0.2s ease;
+            box-sizing: border-box;
+            border: none;
+            cursor: pointer;
+        }
+
+        .action-button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .footer {
+            margin-top: 32px;
+            text-align: center;
+            font-size: 13px;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border-color);
+            padding-top: 16px;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                width: 95%;
+                padding: 24px;
+                margin: 20px auto;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Account & Data Deletion</h1>
+        <div class="subtitle">Student Portal App</div>
+
+        <div class="info-box">
+            We value your privacy. If you wish to delete your account and all associated personal data from the Student Portal app, you can request data deletion using the button below.
+        </div>
+
+        <p><strong>What happens when you delete your account?</strong></p>
+        <ul>
+            <li>Your profile information (name, email, etc.) will be permanently erased.</li>
+            <li>Your app preferences and saved data will be removed.</li>
+            <li>Any active sessions will be terminated immediately.</li>
+            <li>This action is irreversible and cannot be undone.</li>
+        </ul>
+
+        <p><strong>Note:</strong> Data deletion requests are typically processed within 3-5 business days. You will receive an email confirmation once your data has been completely removed from our systems.</p>
+
+        <!-- Replace 'your.support@email.com' with your actual support email -->
+        <a href="mailto:your.support@email.com?subject=Account%20Deletion%20Request&body=Hello,%0A%0AI%20would%20like%20to%20request%20the%20deletion%20of%20my%20account%20and%20all%20associated%20data%20from%20the%20Student%20Portal%20app.%0A%0AMy%20registered%20email%20address%20is:%0A%0AThank%20you." class="action-button">
+            Request Account Deletion
+        </a>
+
+        <div class="footer">
+            &copy; <span id="year"></span> Student Portal. All rights reserved.<br>
+            If you have any questions, please contact our support team.
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('year').textContent = new Date().getFullYear();
+    </script>
+</body>
+</html>
