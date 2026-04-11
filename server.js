@@ -288,7 +288,9 @@ app.post('/api/forgot-password', async (req, res) => {
         }
 
         const transporter = nodemailer.createTransport({
-            service: 'gmail',
+            host: 'smtp.gmail.com',
+            port: 465,
+            secure: true,
             auth: { user: emailUser, pass: emailPass },
         });
 
@@ -311,7 +313,7 @@ app.post('/api/forgot-password', async (req, res) => {
         res.json({ success: true, message: 'Password reset link sent to your email!' });
     } catch (error) {
         console.error('Forgot password error:', error);
-        res.status(500).json({ error: 'Failed to send reset email. Please try again.' });
+        res.status(500).json({ error: `SMTP Error: ${error.message}` });
     }
 });
 
