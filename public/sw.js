@@ -1,4 +1,4 @@
-const CACHE_NAME = 'vignan-portal-v7';
+const CACHE_NAME = 'vignan-portal-v8';
 const ASSETS_TO_CACHE = [
     '/',
     '/index.html',

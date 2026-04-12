@@ -1,6 +1,7 @@
 /**
  * Version Check Module
  * Dynamically compares current app version natively with remote config to enforce mandatory updates.
+ * If the app version cannot be determined (older builds without @capacitor/app), assume outdated.
  */
 
 (function() {
@@ -58,7 +59,7 @@
         document.body.style.overflow = 'hidden';
 
         // Override hardware back button defensively
-        if (window.Capacitor.Plugins.App) {
+        if (window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
             window.Capacitor.Plugins.App.addListener('backButton', () => {
                 // Do nothing to prevent escaping the modal
             });
@@ -67,26 +68,46 @@
 
     async function enactVersionCheck() {
         try {
-            // Wait for Capacitor App plugin to be mapped
-            if (!window.Capacitor.Plugins.App) {
-                console.warn('@capacitor/app is not installed. Version check aborted.');
+            // Fetch remote config first — if server is unreachable, skip (don't break offline use)
+            let configData;
+            try {
+                const configRes = await fetch('/api/app-config');
+                configData = await configRes.json();
+            } catch (fetchErr) {
+                console.warn('Version check: server unreachable, skipping.', fetchErr);
                 return;
             }
 
-            const [configRes, appInfo] = await Promise.all([
-                fetch('/api/app-config'),
-                window.Capacitor.Plugins.App.getInfo()
-            ]);
+            if (!configData.success || !configData.data || !configData.data.minimum_required_version) {
+                return;
+            }
 
-            const configData = await configRes.json();
-            
-            if (configData.success && configData.data.minimum_required_version) {
-                const requiredVer = configData.data.minimum_required_version;
-                const currentVer = appInfo.version;
+            const requiredVer = configData.data.minimum_required_version;
 
-                if (isVersionOutdated(currentVer, requiredVer)) {
-                    showUpdateOverlay();
+            // Try to get app version from @capacitor/app plugin
+            let currentVer = null;
+            try {
+                if (window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
+                    const appInfo = await window.Capacitor.Plugins.App.getInfo();
+                    currentVer = appInfo.version;
                 }
+            } catch (pluginErr) {
+                console.warn('Version check: @capacitor/app plugin failed.', pluginErr);
+            }
+
+            // ⚠️ KEY LOGIC: If we are running natively but CANNOT determine the version,
+            // the app is an OLD build that doesn't have @capacitor/app.
+            // Old builds (< 1.5) = must update. So we show the update screen.
+            if (currentVer === null) {
+                console.warn('Version check: Cannot determine app version → treating as outdated.');
+                showUpdateOverlay();
+                return;
+            }
+
+            // Normal comparison: current vs required
+            if (isVersionOutdated(currentVer, requiredVer)) {
+                console.warn('Version check: ' + currentVer + ' < ' + requiredVer + ' → update required.');
+                showUpdateOverlay();
             }
         } catch (error) {
             console.error('Failed to perform version check', error);
