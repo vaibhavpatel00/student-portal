@@ -162,6 +162,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Start countdown timer
     startCountdownTimer();
+
+    // Set app version
+    const versionEl = document.getElementById('appVersionDisplay');
+    if (versionEl) {
+      if (window.Capacitor && window.Capacitor.isNative && window.Capacitor.Plugins.App) {
+        window.Capacitor.Plugins.App.getInfo().then(info => {
+          versionEl.textContent = `${info.version} (Build ${info.build})`;
+        }).catch(() => {
+          versionEl.textContent = 'Native (Unknown)';
+        });
+      } else if (window.Capacitor && window.Capacitor.isNative) {
+        versionEl.textContent = 'Native (Missing App Plugin)';
+      } else {
+        versionEl.textContent = 'Web Version';
+      }
+    }
   }
 
   // ===== TODAY'S ATTENDANCE =====
