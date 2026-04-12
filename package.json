@@ -19,7 +19,7 @@
     "@capacitor/cli": "^8.2.0",
     "@capacitor/core": "^8.2.0",
     "@capacitor/ios": "^8.2.0",
-    "@capacitor/app": "^8.2.0",
+    "@capacitor/app": "^8.1.0",
     "axios": "^1.13.6",
     "bcryptjs": "^3.0.3",
     "better-sqlite3": "^12.8.0",

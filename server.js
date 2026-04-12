@@ -118,7 +118,7 @@ app.get('/api/app-config', (req, res) => {
     res.json({
         success: true,
         data: {
-            minimum_required_version: "1.6.0"
+            minimum_required_version: "1.5"
         }
     });
 });
