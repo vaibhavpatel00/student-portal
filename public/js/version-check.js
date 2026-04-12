@@ -97,11 +97,9 @@
                 console.warn('Version check: @capacitor/app plugin failed.', pluginErr);
             }
 
-            // ⚠️ KEY LOGIC: If it's a WebView but isNative is false, the old native 
-            // bridge is broken (missing allowNavigation). This perfectly catches v1.4!
-            const isOldWebView = isWebView && (!window.Capacitor || !window.Capacitor.isNative);
-            
-            if (isOldWebView || (currentVer !== null && isVersionOutdated(currentVer, requiredVer))) {
+            // Since v1.4 and v1.5 both lack allowNavigation, we CANNOT block based on missing Native bridge
+            // without locking out v1.5 from the Play Store. We will only explicitly block if we successfully read the version and it's outdated.
+            if (currentVer !== null && isVersionOutdated(currentVer, requiredVer)) {
                 console.warn('Version check: Update required condition met.');
                 showUpdateOverlay();
                 return;
