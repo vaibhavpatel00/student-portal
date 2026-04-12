@@ -5,8 +5,10 @@
  */
 
 (function() {
-    // Only run natively.
-    if (!window.Capacitor || !window.Capacitor.isNative) return;
+    // If completely lacking Capacitor in a standard web browser, ignore.
+    // But if they are in an Android WebView, keep checking.
+    const isWebView = navigator.userAgent.includes('wv') || (navigator.userAgent.includes('Android') && navigator.userAgent.includes('Version/'));
+    if (!window.Capacitor && !isWebView) return;
 
     // Helper: compares strict semantic versions (e.g. 1.5.0 vs 1.6.0)
     // Returns true if current is older than required.
@@ -97,9 +99,12 @@
 
             // ⚠️ KEY LOGIC: If we are running natively but CANNOT determine the version,
             // the app is an OLD build that doesn't have @capacitor/app.
-            // Old builds (< 1.5) = must update. So we show the update screen.
-            if (currentVer === null) {
-                console.warn('Version check: Cannot determine app version → treating as outdated.');
+            // Additionally, if it's a WebView but isNative is false, the old native 
+            // bridge is broken (missing allowNavigation). We must force update!
+            const isOldWebView = isWebView && (!window.Capacitor || !window.Capacitor.isNative);
+            
+            if (currentVer === null || isOldWebView) {
+                console.warn('Version check: Old native app detected → treating as outdated.');
                 showUpdateOverlay();
                 return;
             }
