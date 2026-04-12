@@ -4,6 +4,7 @@
   "webDir": "public",
   "server": {
     "url": "https://student-portal-r2tp.vercel.app/",
+    "allowNavigation": ["student-portal-r2tp.vercel.app"],
     "cleartext": true
   }
 }

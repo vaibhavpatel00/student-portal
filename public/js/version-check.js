@@ -97,14 +97,12 @@
                 console.warn('Version check: @capacitor/app plugin failed.', pluginErr);
             }
 
-            // ⚠️ KEY LOGIC: If we are running natively but CANNOT determine the version,
-            // the app is an OLD build that doesn't have @capacitor/app.
-            // Additionally, if it's a WebView but isNative is false, the old native 
-            // bridge is broken (missing allowNavigation). We must force update!
+            // ⚠️ KEY LOGIC: If it's a WebView but isNative is false, the old native 
+            // bridge is broken (missing allowNavigation). This perfectly catches v1.4!
             const isOldWebView = isWebView && (!window.Capacitor || !window.Capacitor.isNative);
             
-            if (currentVer === null || isOldWebView) {
-                console.warn('Version check: Old native app detected → treating as outdated.');
+            if (isOldWebView || (currentVer !== null && isVersionOutdated(currentVer, requiredVer))) {
+                console.warn('Version check: Update required condition met.');
                 showUpdateOverlay();
                 return;
             }
