@@ -166,7 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Set app version
     const versionEl = document.getElementById('appVersionDisplay');
     if (versionEl) {
-      if (window.Capacitor && window.Capacitor.isNative && window.Capacitor.Plugins.App) {
+      if (window.Capacitor && window.Capacitor.isNative && window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
         window.Capacitor.Plugins.App.getInfo().then(info => {
           versionEl.textContent = `${info.version} (Build ${info.build})`;
         }).catch(() => {
@@ -174,8 +174,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       } else if (window.Capacitor && window.Capacitor.isNative) {
         versionEl.textContent = 'Native (Missing App Plugin)';
+      } else if (window.Capacitor) {
+        versionEl.textContent = 'Web (Capacitor mapped, but isNative is false)';
       } else {
-        versionEl.textContent = 'Web Version';
+        const isWebView = navigator.userAgent.includes('wv') || (navigator.userAgent.includes('Android') && navigator.userAgent.includes('Version/'));
+        versionEl.textContent = isWebView ? 'WebView (Bridge Missing)' : 'Web Browser';
       }
     }
   }
