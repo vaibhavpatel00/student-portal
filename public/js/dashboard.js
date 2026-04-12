@@ -195,7 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function setupNavigationAds() {
-    const navLinks = document.querySelectorAll('a[href="/results"], a[href="/profile"]');
+    const navLinks = document.querySelectorAll('a[href="/results"], a[href="/announcements"]');
     navLinks.forEach(link => {
       link.addEventListener('click', async (e) => {
         if (!window.Capacitor || !window.Capacitor.isNative || !window.Capacitor.Plugins || !window.Capacitor.Plugins.UnityAds) {
@@ -217,11 +217,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
           // Add a 3.5 second timeout so the user isn't stuck on the loading screen
           // if Unity fails to fire a callback (e.g. no fill, offline, network hung).
-          const loadPromise = UnityAds.loadAd({ placementId: 'Interstitial_Android' });
+          const loadPromise = UnityAds.loadAd({ placementId: 'Rewarded_Android' });
           const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Ad Load Timeout')), 3500));
           
           await Promise.race([loadPromise, timeoutPromise]);
-          await UnityAds.showAd({ placementId: 'Interstitial_Android' });
+          await UnityAds.showAd({ placementId: 'Rewarded_Android' });
         } catch (err) {
           console.error("Navigation Ad Error or Timeout: ", err);
         } finally {
@@ -476,33 +476,9 @@ document.addEventListener('DOMContentLoaded', () => {
     localStorage.removeItem('authToken');
     window.location.href = '/';
   }
-
-  // ===== UNITY ADS =====
-  async function showTestAd() {
-    const btn = document.getElementById('showAdBtn');
-    const originalText = btn.textContent;
-    
-    try {
-      btn.textContent = 'Loading Ad...';
-      btn.disabled = true;
-      
-      console.log('UNITY ADS: Loading Interstitial...');
-      const { UnityAds } = Capacitor.Plugins;
-      await UnityAds.loadAd({ placementId: 'Interstitial_Android' });
-      
-      console.log('UNITY ADS: Showing Interstitial...');
-      const result = await UnityAds.showAd({ placementId: 'Interstitial_Android' });
-      
-      console.log('UNITY ADS: Ad Result State -', result.state);
-    } catch (err) {
-      console.error('UNITY ADS Error:', err.message);
-      alert('Failed to show ad: ' + err.message);
-    } finally {
-      btn.textContent = originalText;
-      btn.disabled = false;
-    }
-  }
 });
+
+
 
 // Register Service Worker for PWA
 if ('serviceWorker' in navigator) {
