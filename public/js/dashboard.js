@@ -213,14 +213,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
           const { UnityAds } = window.Capacitor.Plugins;
-          // Clean up banner before leaving
           UnityAds.hideBanner().catch(e => {});
 
-          await UnityAds.loadAd({ placementId: 'Interstitial_Android' });
+          // Add a 3.5 second timeout so the user isn't stuck on the loading screen
+          // if Unity fails to fire a callback (e.g. no fill, offline, network hung).
+          const loadPromise = UnityAds.loadAd({ placementId: 'Interstitial_Android' });
+          const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Ad Load Timeout')), 3500));
+          
+          await Promise.race([loadPromise, timeoutPromise]);
           await UnityAds.showAd({ placementId: 'Interstitial_Android' });
         } catch (err) {
-          console.error("Navigation Ad Error: ", err);
+          console.error("Navigation Ad Error or Timeout: ", err);
         } finally {
+          // Immediately redirect whether the ad showed, failed, or timed out
           window.location.href = targetUrl;
         }
       });
