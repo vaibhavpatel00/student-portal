@@ -1,4 +1,4 @@
-const CACHE_NAME = 'vignan-portal-v5';
+const CACHE_NAME = 'vignan-portal-v6';
 const ASSETS_TO_CACHE = [
     '/',
     '/index.html',
@@ -18,6 +18,7 @@ const ASSETS_TO_CACHE = [
     '/js/reset-password.js',
     '/js/profile.js',
     '/js/announcements.js',
+    '/js/force-update.js',
     '/images/logo.png'
 ];
 
