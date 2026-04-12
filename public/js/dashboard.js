@@ -181,6 +181,50 @@ document.addEventListener('DOMContentLoaded', () => {
         versionEl.textContent = isWebView ? 'WebView (Bridge Missing)' : 'Web Browser';
       }
     }
+
+    // Load Bottom Banner Ad natively
+    if (window.Capacitor && window.Capacitor.isNative && window.Capacitor.Plugins && window.Capacitor.Plugins.UnityAds) {
+      setTimeout(() => {
+        window.Capacitor.Plugins.UnityAds.showBanner({ placementId: 'Banner_Android' })
+          .catch(e => console.error("Banner load error:", e));
+      }, 1500); // slight delay to ensure UI is ready
+    }
+
+    // Intercept Interstitial Ad Links
+    setupNavigationAds();
+  }
+
+  function setupNavigationAds() {
+    const navLinks = document.querySelectorAll('a[href="/results"], a[href="/profile"]');
+    navLinks.forEach(link => {
+      link.addEventListener('click', async (e) => {
+        if (!window.Capacitor || !window.Capacitor.isNative || !window.Capacitor.Plugins || !window.Capacitor.Plugins.UnityAds) {
+          return; // Allow normal navigation if not native
+        }
+
+        e.preventDefault();
+        const targetUrl = link.getAttribute('href');
+        
+        // Show loading state on screen
+        const overlay = document.createElement('div');
+        overlay.style.cssText = 'position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.7); z-index:999999; display:flex; align-items:center; justify-content:center; color:white; font-family:sans-serif; font-weight:bold;';
+        overlay.innerHTML = '<div class="loader"></div><div style="margin-left:16px;">Loading Ad...</div>';
+        document.body.appendChild(overlay);
+
+        try {
+          const { UnityAds } = window.Capacitor.Plugins;
+          // Clean up banner before leaving
+          UnityAds.hideBanner().catch(e => {});
+
+          await UnityAds.loadAd({ placementId: 'Interstitial_Android' });
+          await UnityAds.showAd({ placementId: 'Interstitial_Android' });
+        } catch (err) {
+          console.error("Navigation Ad Error: ", err);
+        } finally {
+          window.location.href = targetUrl;
+        }
+      });
+    });
   }
 
   // ===== TODAY'S ATTENDANCE =====
@@ -421,6 +465,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ===== LOGOUT =====
   async function logout() {
+    if (window.Capacitor && window.Capacitor.isNative && window.Capacitor.Plugins.UnityAds) {
+      window.Capacitor.Plugins.UnityAds.hideBanner().catch(e => {});
+    }
     localStorage.removeItem('authToken');
     window.location.href = '/';
   }

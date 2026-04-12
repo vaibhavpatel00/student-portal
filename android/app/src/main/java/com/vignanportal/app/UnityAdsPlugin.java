@@ -9,9 +9,16 @@ import com.unity3d.ads.IUnityAdsLoadListener;
 import com.unity3d.ads.IUnityAdsShowListener;
 import com.unity3d.ads.UnityAds;
 import com.unity3d.ads.UnityAdsShowOptions;
+import com.unity3d.services.banners.BannerErrorInfo;
+import com.unity3d.services.banners.BannerView;
+import com.unity3d.services.banners.UnityBannerSize;
+import android.view.Gravity;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
 
 @CapacitorPlugin(name = "UnityAds")
 public class UnityAdsPlugin extends Plugin {
+    private BannerView bottomBanner;
 
     @PluginMethod
     public void loadAd(PluginCall call) {
@@ -73,6 +80,71 @@ public class UnityAdsPlugin extends Plugin {
                 call.resolve(ret);
                 notifyListeners("adCompleted", ret);
             }
+        });
+    }
+
+    @PluginMethod
+    public void showBanner(PluginCall call) {
+        String placementId = call.getString("placementId");
+        if (placementId == null) {
+            call.reject("Placement ID is required");
+            return;
+        }
+
+        getActivity().runOnUiThread(() -> {
+            if (bottomBanner != null) {
+                ViewGroup parent = (ViewGroup) bottomBanner.getParent();
+                if (parent != null) {
+                    parent.removeView(bottomBanner);
+                }
+                bottomBanner.destroy();
+                bottomBanner = null;
+            }
+
+            bottomBanner = new BannerView(getActivity(), placementId, new UnityBannerSize(320, 50));
+            bottomBanner.setListener(new BannerView.IListener() {
+                @Override
+                public void onBannerLoaded(BannerView bannerView) {
+                    notifyListeners("bannerLoaded", new JSObject());
+                }
+                @Override
+                public void onBannerClick(BannerView bannerView) {
+                    notifyListeners("bannerClicked", new JSObject());
+                }
+                @Override
+                public void onBannerFailedToLoad(BannerView bannerView, BannerErrorInfo errorInfo) {
+                    System.out.println("UNITY ADS: [BANNER FAIL] " + errorInfo.errorMessage);
+                }
+                @Override
+                public void onBannerLeftApplication(BannerView bannerView) {}
+            });
+            bottomBanner.load();
+
+            FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(
+                    FrameLayout.LayoutParams.WRAP_CONTENT,
+                    FrameLayout.LayoutParams.WRAP_CONTENT
+            );
+            layoutParams.gravity = Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
+
+            ViewGroup parent = (ViewGroup) bridge.getWebView().getParent();
+            parent.addView(bottomBanner, layoutParams);
+
+            call.resolve();
+        });
+    }
+
+    @PluginMethod
+    public void hideBanner(PluginCall call) {
+        getActivity().runOnUiThread(() -> {
+            if (bottomBanner != null) {
+                ViewGroup parent = (ViewGroup) bottomBanner.getParent();
+                if (parent != null) {
+                    parent.removeView(bottomBanner);
+                }
+                bottomBanner.destroy();
+                bottomBanner = null;
+            }
+            call.resolve();
         });
     }
 }
