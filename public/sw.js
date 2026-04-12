@@ -18,7 +18,6 @@ const ASSETS_TO_CACHE = [
     '/js/reset-password.js',
     '/js/profile.js',
     '/js/announcements.js',
-    '/js/force-update.js',
     '/images/logo.png'
 ];
 
