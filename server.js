@@ -24,19 +24,6 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// API Version Block
-app.use('/api', (req, res, next) => {
-    const isMobileClient = req.headers['user-agent'] && req.headers['user-agent'].includes('Capacitor');
-    if (isMobileClient && req.headers['x-app-cache'] !== 'v6') {
-        if (req.path === '/login') {
-            return res.status(200).json({ success: false, error: `🚨 UPDATE REQUIRED 🚨\nYou are using an outdated version of the app. Please update from the Google Play Store immediately to continue using the student portal.\nLink: https://play.google.com/store/apps/details?id=com.vignanportal.app` });
-        } else {
-            return res.status(401).json({ error: 'Update Required' });
-        }
-    }
-    next();
-});
-
 // Auth middleware
 function requireAuth(req, res, next) {
     const authHeader = req.headers.authorization;
@@ -124,6 +111,16 @@ app.get('/api/me', requireAuth, async (req, res) => {
     } catch (err) {
         res.json({ student: req.student });
     }
+});
+
+// ============ CONFIG ROUTES ============
+app.get('/api/app-config', (req, res) => {
+    res.json({
+        success: true,
+        data: {
+            minimum_required_version: "1.6.0"
+        }
+    });
 });
 
 // ============ ATTENDANCE ROUTES ============
