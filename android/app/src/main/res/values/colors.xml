@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+
+    <!-- Force Update Screen Colors -->
+    <color name="updateBackground">#FFFFFF</color>
+    <color name="updateIconBg">#FFF0F0</color>
+    <color name="updateIconStroke">#E63946</color>
+    <color name="updateTitle">#1E293B</color>
+    <color name="updateMessage">#64748B</color>
+    <color name="updateButtonBg">#4F46E5</color>
+    <color name="updateButtonText">#FFFFFF</color>
+</resources>

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/updateBackground"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="32dp">
+
+    <!-- Icon Container -->
+    <FrameLayout
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_marginBottom="32dp">
+
+        <!-- Circular tinted background -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/bg_icon_circle" />
+
+        <!-- Update arrow icon -->
+        <ImageView
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_update_arrow"
+            android:contentDescription="Update icon" />
+    </FrameLayout>
+
+    <!-- Title -->
+    <TextView
+        android:id="@+id/updateTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Update Required"
+        android:textColor="@color/updateTitle"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="12dp" />
+
+    <!-- Message -->
+    <TextView
+        android:id="@+id/updateMessage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="A new version of the app is available.\nPlease update to continue using the app."
+        android:textColor="@color/updateMessage"
+        android:textSize="16sp"
+        android:textAlignment="center"
+        android:lineSpacingMultiplier="1.5"
+        android:layout_marginBottom="40dp"
+        android:maxWidth="340dp" />
+
+    <!-- Update Now Button -->
+    <TextView
+        android:id="@+id/btnUpdateNow"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxWidth="300dp"
+        android:text="Update Now"
+        android:textColor="@color/updateButtonText"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textAlignment="center"
+        android:gravity="center"
+        android:paddingTop="16dp"
+        android:paddingBottom="16dp"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp"
+        android:background="@drawable/bg_update_button"
+        android:elevation="4dp"
+        android:clickable="true"
+        android:focusable="true" />
+
+</LinearLayout>
