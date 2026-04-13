@@ -181,6 +181,40 @@ async function fetchHourAttendance(department, date, hour, rollNumber, year, sec
         let totalStrength = 0;
         let found = false;
 
+        // Custom Logic for BSH Department
+        if (department.toUpperCase() === 'BSH') {
+            const hasRows = $('table tr').length > 1;
+            
+            if (!hasRows) {
+                return {
+                    hour, subjectName: 'No Class', isPresent: false, 
+                    totalPresent: 0, totalStrength: 0, found: true, noClass: true
+                };
+            }
+
+            const pageText = $.text().toUpperCase();
+            const isAbsent = pageText.includes(rollNumber.toUpperCase());
+            
+            // Try to get subject name from the first available row's Subject column (Index 5)
+            const firstSubjCell = $('table tr:nth-child(2) td').eq(5);
+            if (firstSubjCell.length > 0) {
+                subjectName = firstSubjCell.text().trim();
+            }
+            if (!subjectName || subjectName === '--') {
+                subjectName = 'BSH Class';
+            }
+
+            return {
+                hour,
+                subjectName: subjectName,
+                isPresent: !isAbsent,
+                totalPresent: 0,
+                totalStrength: 0,
+                found: true,
+                noClass: false,
+            };
+        }
+
         $('table tr').each((i, row) => {
             if (i === 0) return; // Skip header
 
