@@ -205,8 +205,8 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         const targetUrl = link.getAttribute('href');
         
-        // Show loading state on screen
         const overlay = document.createElement('div');
+        overlay.id = 'adLoadingOverlay';
         overlay.style.cssText = 'position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.7); z-index:999999; display:flex; align-items:center; justify-content:center; color:white; font-family:sans-serif; font-weight:bold;';
         overlay.innerHTML = '<div class="loader"></div><div style="margin-left:16px;">Loading Ad...</div>';
         document.body.appendChild(overlay);
@@ -215,17 +215,24 @@ document.addEventListener('DOMContentLoaded', () => {
           const { UnityAds } = window.Capacitor.Plugins;
           UnityAds.hideBanner().catch(e => {});
 
-          // Add a 3.5 second timeout so the user isn't stuck on the loading screen
-          // if Unity fails to fire a callback (e.g. no fill, offline, network hung).
           const loadPromise = UnityAds.loadAd({ placementId: 'Rewarded_Android' });
-          const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Ad Load Timeout')), 3500));
+          const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Ad Load Timeout')), 4500));
           
           await Promise.race([loadPromise, timeoutPromise]);
-          await UnityAds.showAd({ placementId: 'Rewarded_Android' });
+          
+          const result = await UnityAds.showAd({ placementId: 'Rewarded_Android' });
+          
+          if (result && result.state === 'SKIPPED') {
+            alert('You must watch the full ad to access this page.');
+            overlay.remove();
+            return; // Abort navigation
+          }
+          
+          // Ad completed successfully or we are in a fallback state
+          window.location.href = targetUrl;
         } catch (err) {
           console.error("Navigation Ad Error or Timeout: ", err);
-        } finally {
-          // Immediately redirect whether the ad showed, failed, or timed out
+          // If Unity fails entirely (timeout, no fill), let them through so app doesn't break
           window.location.href = targetUrl;
         }
       });
