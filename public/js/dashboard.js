@@ -145,10 +145,22 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('todayDate').textContent =
       `${today.getDate()} ${months[today.getMonth()]} ${today.getFullYear()}`;
 
-    const fromDefault = '2025-12-22';
+    // Load saved fromDate or use default
+    let fromDefault = localStorage.getItem('vignanFromDate');
+    if (!fromDefault) {
+      fromDefault = '2025-12-22';
+    }
     const toDefault = today.toISOString().split('T')[0];
+    
     document.getElementById('fromDate').value = fromDefault;
     document.getElementById('toDate').value = toDefault;
+
+    // Save fromDate when user changes it
+    document.getElementById('fromDate').addEventListener('change', (e) => {
+      if (e.target.value) {
+        localStorage.setItem('vignanFromDate', e.target.value);
+      }
+    });
 
     document.getElementById('logoutBtn').addEventListener('click', logout);
     document.getElementById('refreshToday').addEventListener('click', loadTodayAttendance);
